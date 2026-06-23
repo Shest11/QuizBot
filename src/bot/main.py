@@ -8,6 +8,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from dotenv import load_dotenv
+from bot.handlers.survey_flow import router as survey_router
 
 load_dotenv()
 
@@ -25,6 +26,8 @@ async def main() -> None:
 
     bot = Bot(token=get_bot_token())
     dispatcher = Dispatcher()
+
+    dispatcher.include_router(survey_router)
 
     dispatcher.message.register(handle_start, CommandStart())
     await dispatcher.start_polling(bot)
