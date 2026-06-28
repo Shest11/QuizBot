@@ -63,7 +63,7 @@ def seed_feedback_form(db_session)-> None:
         AnswerModel(question_id=q2.id, text="Нет", next_question_id=0, score=0),
     ])
     db_session.commit()
-    print("Опрос 'Анкета обратной связи' добавлен в БД")
+    print("Анкета обратной связи добавлен в БД")
 
 def main() -> None:
     db_engine = create_db_engine("quizbot.db")
