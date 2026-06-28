@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from .database import Base
 
-class ServeyModel(Base):
+class SurveyModel(Base):
 
     __tablename__ = "surveys"
 
