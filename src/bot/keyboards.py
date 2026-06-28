@@ -1,0 +1,15 @@
+from __future__ import annotations
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
+from core.models import Question
+
+
+def build_keyboard_for_question(question: Question) -> InlineKeyboardMarkup | ReplyKeyboardRemove:
+
+    if question.question_type == "free_text":
+        return ReplyKeyboardRemove()
+
+    buttons = [
+        [InlineKeyboardButton(text=answer.text, callback_data=f"answer:{answer.text}")]
+        for answer in question.answers
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
