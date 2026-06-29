@@ -21,7 +21,7 @@ async def handle_start(message: Message) -> None:
         resize_keyboard=True,
     )
     await message.answer(
-        "Привет! Я бот для прохождения опросов.",
+        "Добро пожаловать! Я бот для прохождения опросов.",
         reply_markup=keyboard,
     )
 
