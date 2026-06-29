@@ -6,9 +6,10 @@ import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
-from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup
 from dotenv import load_dotenv
-from bot.handlers.survey_flow import setup_survey_flow_router
+
+from bot.handlers.survey_flow import router as survey_router
 from core.db.database import create_db_engine, create_session_factory, init_db
 from core.engine import SurveyEngine
 
@@ -20,7 +21,7 @@ async def handle_start(message: Message) -> None:
         resize_keyboard=True,
     )
     await message.answer(
-        "Добро пожаловать! Я бот для прохождения опросов.",
+        "Привет! Я бот для прохождения опросов.",
         reply_markup=keyboard,
     )
 
@@ -35,14 +36,18 @@ async def main() -> None:
 
     bot = Bot(token=get_bot_token())
     dispatcher = Dispatcher()
+
     db_engine = create_db_engine("quizbot.db")
     init_db(db_engine)
     session_factory = create_session_factory(db_engine)
-
     survey_engine = SurveyEngine(session_factory=session_factory)
-    dispatcher.include_router(setup_survey_flow_router(survey_engine))
+    dispatcher["survey_engine"] = survey_engine
+
+    dispatcher.include_router(survey_router)
     dispatcher.message.register(handle_start, CommandStart())
+
     await dispatcher.start_polling(bot)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
