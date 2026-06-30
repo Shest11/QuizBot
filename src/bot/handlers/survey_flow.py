@@ -71,7 +71,10 @@ async def _process_answer(
 
     if isinstance(result, str):
         await state.clear()
-        await message.answer(f"Опрос завершен!\n\n{result}")
-    else:
-        keyboard = build_keyboard_for_question(result)
-        await message.answer(result.text, reply_markup=keyboard)
+        surveys = survey_engine.list_available_surveys()
+        buttons = [
+            [InlineKeyboardButton(text=survey.title, callback_data=f"start_survey:{survey.id}")]
+            for survey in surveys
+        ]
+        keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+        await message.answer(f"Опрос завершен!\n\n{result}", reply_markup=keyboard)
