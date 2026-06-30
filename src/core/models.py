@@ -39,4 +39,4 @@ class Survey:
         for result_range in self.result_ranges:
             if result_range.min_score <= total_score <= result_range.max_score:
                 return result_range.text
-        return "Опрос завершён, спасибо за ответы!"
+        return "Спасибо за ответы!\nПопробуйте другие опросы из списка."
