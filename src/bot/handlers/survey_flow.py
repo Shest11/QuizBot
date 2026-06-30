@@ -78,3 +78,6 @@ async def _process_answer(
         ]
         keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
         await message.answer(f"Опрос завершен!\n\n{result}", reply_markup=keyboard)
+    else:
+        keyboard = build_keyboard_for_question(result)
+        await message.answer(result.text, reply_markup=keyboard)
