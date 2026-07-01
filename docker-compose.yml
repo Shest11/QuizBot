@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: quizbot_container
+    restart: always
+    env_file:
+      - src/bot/.env
+    volumes:
+      - ./quizbot.db:/app/quizbot.db
