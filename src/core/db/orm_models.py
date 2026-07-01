@@ -56,6 +56,14 @@ class QuizResult(Base):
     survey_id: Mapped[int] = mapped_column(ForeignKey("surveys.id"), index=True)
     total_score: Mapped[int] = mapped_column(Integer)
     result_text: Mapped[str] = mapped_column(String)
-    finished_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now(datetime.UTC))
+    finished_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC))
 
 
+class ResultRangeModel(Base):
+    __tablename__ = "result_ranges"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    survey_id: Mapped[int] = mapped_column(ForeignKey("surveys.id"), index=True)
+    min_score: Mapped[int] = mapped_column(Integer)
+    max_score: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(String)
