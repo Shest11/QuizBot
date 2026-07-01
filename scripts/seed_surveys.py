@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src")) # src становится путем для импорта, чтобы перейти в core.db.
 
 from core.db.database import create_db_engine, create_session_factory, init_db
-from core.db.orm_models import AnswerModel, QuestionModel, SurveyModel
+from core.db.orm_models import AnswerModel, QuestionModel, SurveyModel, ResultRangeModel
 
 
 def seed_anxiety_test(db_session)-> None:
@@ -34,6 +34,11 @@ def seed_anxiety_test(db_session)-> None:
         AnswerModel(question_id=q1.id, text="Часто", next_question_id=q2.id, score=2),
         AnswerModel(question_id=q3.id, text="Нет", next_question_id=0, score=0),  # 0 = конец опроса
         AnswerModel(question_id=q3.id, text="Да", next_question_id=0, score=2),
+    ])
+
+    db_session.add_all([
+        ResultRangeModel(survey_id=survey.id, min_score=0, max_score=2, text="У вас низкий уровень тревожности, всё хорошо."),
+        ResultRangeModel(survey_id=survey.id, min_score=3, max_score=5, text="Есть признаки повышенной тревожности, стоит отдохнуть."),
     ])
     db_session.commit()
     print("Тест на тревожность добавлен в БД")
