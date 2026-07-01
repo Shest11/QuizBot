@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from core.db.orm_models import AnswerModel, QuestionModel, SurveyModel
+from core.db.orm_models import AnswerModel, QuestionModel, SurveyModel, ResultRangeModel
 from core.models import Answer, Question, Survey
 
 
@@ -41,11 +41,16 @@ class SurveyRepository:
                 next_question_id=question_row.next_question_id,
             )
 
+        range_rows = db_session.execute(select(ResultRangeModel).where(ResultRangeModel.survey_id == survey_id)).scalars().all()
+
+        result_ranges = [ResultRangeModel(min_score=r.min_score, max_score=r.max_score, text=r.text) for r in range_rows]
+
         return Survey(
             id=survey_row.id,
             title=survey_row.title,
             start_question_id=survey_row.start_question_id,
             questions=questions,
+            result_ranges=result_ranges,
         )
 
     def list_surveys(self, db_session: Session) -> list[Survey]:
