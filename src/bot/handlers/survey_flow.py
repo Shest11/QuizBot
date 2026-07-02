@@ -25,18 +25,10 @@ async def handle_help_command(message: Message) -> None:
     )
 
     builder = InlineKeyboardBuilder()
-    builder.button(text="ℹ️ Показать справку еще раз", callback_data="refresh_help")
     builder.button(text="⭐ Исходный код на GitHub", url="https://github.com/Shest11/QuizBot")
     builder.adjust(1)
 
     await message.answer(help_text, reply_markup=builder.as_markup(), parse_mode="Markdown")
-
-@router.callback_query(F.data == "refresh_help", StateFilter("*"))
-async def handle_refresh_help_callback(callback: CallbackQuery) -> None:
-    await callback.answer()
-    if callback.message:
-        await handle_help_command(callback.message)
-
 
 @router.message(Command("surveys"))
 async def handle_surveys_list(message: Message, survey_engine: SurveyEngine) -> None:
