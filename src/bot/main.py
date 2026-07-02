@@ -17,12 +17,26 @@ load_dotenv()
 
 async def handle_start(message: Message) -> None:
     keyboard = ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="📋 Показать опросы")]],
+        keyboard=[
+            [
+                KeyboardButton(text="📋 Показать опросы"),
+                KeyboardButton(text="ℹ️ Справка")  # Кнопка встанет в один ряд справа
+            ]
+        ],
         resize_keyboard=True,
     )
+    welcome_text = (
+        "👋 **Добро пожаловать в QuizBot!**\n\n"
+        "Я помогу вам пройти интерактивные и адаптивные опросы прямо здесь, в Telegram.\n\n"
+        "🚀 **С чего начать:**\n"
+        "🔹 Нажмите «**📋 Показать опросы**», чтобы выбрать доступный тест.\n"
+        "🔹 Нажмите «**ℹ️ Справка**», чтобы узнать больше о возможностях системы и посмотреть исходный код проекта."
+    )
+
     await message.answer(
-        "Добро пожаловать! Я бот для прохождения опросов.",
+        text=welcome_text,
         reply_markup=keyboard,
+        parse_mode="Markdown"
     )
 
 def get_bot_token() -> str:

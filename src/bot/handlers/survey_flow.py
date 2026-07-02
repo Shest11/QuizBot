@@ -1,15 +1,42 @@
 from __future__ import annotations
 
 from aiogram import F, Router
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot.keyboards import build_keyboard_for_question
+from bot.keyboards import build_keyboard_for_question, MAIN_MENU_KEYBOARD
 from core.engine import SurveyEngine
 from bot.states import SurveyStates
 
 router = Router()
+
+@router.message(Command("help"))
+async def handle_help_command(message: Message) -> None:
+    help_text = (
+        "📖 **Справка по использованию QuizBot**\n\n"
+        "Этот бот предназначен для прохождения интерактивных многоуровневых опросов.\n\n"
+        "**Доступные команды:**\n"
+        "▶️ /start - Начать работу с ботом\n"
+        "📋 /surveys - Посмотреть список доступных тестов\n"
+        "ℹ️ /help - Показать это справочное сообщение\n\n"
+        "💡 _Внутри опросов система сама ведет вас по нужным вопросам в зависимости от ваших ответов!_"
+    )
+
+    builder = InlineKeyboardBuilder()
+    builder.button(text="ℹ️ Показать справку еще раз", callback_data="refresh_help")
+    builder.button(text="⭐ Исходный код на GitHub", url="https://github.com/Shest11/QuizBot")
+    builder.adjust(1)
+
+    await message.answer(help_text, reply_markup=builder.as_markup(), parse_mode="Markdown")
+
+@router.callback_query(F.data == "refresh_help", StateFilter("*"))
+async def handle_refresh_help_callback(callback: CallbackQuery) -> None:
+    await callback.answer()
+    if callback.message:
+        await handle_help_command(callback.message)
+
 
 @router.message(Command("surveys"))
 async def handle_surveys_list(message: Message, survey_engine: SurveyEngine) -> None:
@@ -27,6 +54,11 @@ async def handle_surveys_button(message: Message, survey_engine: SurveyEngine) -
     await handle_surveys_list(message, survey_engine)
 
 
+@router.message(F.text == "ℹ️ Справка", StateFilter("*"))
+async def handle_help_button(message: Message) -> None:
+    await handle_help_command(message)
+
+
 @router.callback_query(F.data.startswith("start_survey:"))
 async def handle_survey_selected(callback: CallbackQuery, survey_engine: SurveyEngine, state: FSMContext) -> None:
     survey_id = int(callback.data.split(":", maxsplit=1)[1])
@@ -36,9 +68,8 @@ async def handle_survey_selected(callback: CallbackQuery, survey_engine: SurveyE
     await state.update_data(survey_id=survey_id)
     await state.set_state(SurveyStates.answering)
 
-    keyboard = build_keyboard_for_question(question)
     if callback.message:
-        await callback.message.answer(question.text, reply_markup=keyboard)
+        await _send_question(callback.message, question, state)
 
 @router.callback_query(F.data.startswith("answer:"), SurveyStates.answering)
 async def handle_button_answer(callback: CallbackQuery, survey_engine: SurveyEngine, state: FSMContext) -> None:
@@ -79,5 +110,17 @@ async def _process_answer(
         keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
         await message.answer(f"Опрос завершен!\n\n{result}", reply_markup=keyboard)
     else:
-        keyboard = build_keyboard_for_question(result)
-        await message.answer(result.text, reply_markup=keyboard)
+        await _send_question(message, result, state)
+
+async def _send_question(message: Message, question, state: FSMContext) -> None:
+    data = await state.get_data()
+    panel_was_hidden = data.get("panel_hidden", False)
+    is_free_text = question.question_type == "free_text"
+
+    if not is_free_text and panel_was_hidden:
+        await message.answer("Записал ваш ответ, продолжаем 👇", reply_markup=MAIN_MENU_KEYBOARD)
+
+    await state.update_data(panel_hidden=is_free_text)
+
+    keyboard = build_keyboard_for_question(question)
+    await message.answer(question.text, reply_markup=keyboard)
