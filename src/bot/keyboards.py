@@ -1,10 +1,14 @@
 from __future__ import annotations
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from core.models import Question
 
 
-def build_keyboard_for_question(question: Question) -> InlineKeyboardMarkup | ReplyKeyboardRemove:
+MAIN_MENU_KEYBOARD = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="📋 Показать опросы"), KeyboardButton(text="ℹ️ Справка")]],
+    resize_keyboard=True,
+)
 
+def build_keyboard_for_question(question: Question) -> InlineKeyboardMarkup | ReplyKeyboardRemove:
     if question.question_type == "free_text":
         return ReplyKeyboardRemove()
 
