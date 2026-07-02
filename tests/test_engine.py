@@ -28,10 +28,10 @@ def memory_db():
         session.add(AnswerModel(id=2, question_id=1, text="Нет", next_question_id=3, score=1))
 
         # вопрос 2 (свободный текст).
-        session.add(QuestionModel(id=2, survey_id=1, text="Опишите ваш страх:", question_type="free_text"))
+        session.add(QuestionModel(id=2, survey_id=1, text="Опишите ваш страх:", question_type="free_text", next_question_id=0))
 
         # вопрос 3 (свободный текст).
-        session.add(QuestionModel(id=3, survey_id=1, text="Почему вы так спокойны?", question_type="free_text"))
+        session.add(QuestionModel(id=3, survey_id=1, text="Почему вы так спокойны?", question_type="free_text", next_question_id=0))
 
         # вилка результатов
         session.add(ResultRangeModel(survey_id=1, min_score=0, max_score=2, text="Результат: Всё отлично"))
@@ -80,6 +80,16 @@ def test_final_score_calculation(memory_db):
     engine = SurveyEngine(session_factory=memory_db)
     engine.start_survey(user_id=777, survey_id=1)
 
+    # отвечаем на первый вопрос 'Да'
     next_q = engine.answer(user_id=777, survey_id=1, answer_text="Да")
     assert next_q.id == 2
     assert next_q.text == "Опишите ваш страх:"
+
+    # отвечаем на free_text вопрос
+    final_result = engine.answer(user_id=777, survey_id=1, answer_text="Мне очень страшно")
+
+    # проверяем, что это строка (результат), а не вопрос
+    assert isinstance(final_result, str)
+
+    # проверяем, что результат соответствует набранным баллам
+    assert final_result == "Результат: Стресс"
